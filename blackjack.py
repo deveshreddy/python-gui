@@ -1,6 +1,7 @@
 import tkinter
 import random
 
+
 def load_images(card_images):
     suits = ['heart', 'club', 'diamond', 'spade']
     face_cards = ['king', 'queen', 'jack']
@@ -17,7 +18,7 @@ def load_images(card_images):
             card_images.append((10, image, ))
 
 
-def deal_cards(frame):
+def _deal_cards(frame):
     # pop next card
     next_card = deck.pop(0)
     deck.append(next_card)
@@ -35,6 +36,7 @@ def score_hand(hand):
     ace = False
     for next_card in hand:
         card_value = next_card[0]
+
         if card_value == 1 and not ace:
             ace = True
             card_value = 11
@@ -43,16 +45,27 @@ def score_hand(hand):
         if score > 21 and ace:
             score -= 10
             ace = False
+
     return score
 
 
 def deal_player():
-    player_hand.append(deal_cards(player_card_frame))
+
     player_score = score_hand(player_hand)
 
+    if player_score < 21:
+        player_hand.append(_deal_cards(player_card_frame))
+        player_score = score_hand(player_hand)
+
+    if player_score == 21:
+        result_text.set('Player player wins')
+
+    elif player_score > 21:
+        result_text.set('Delaer Delaer wins')
+
     player_score_label.set(player_score)
-    if player_score > 21:
-        result_text.set('dealer won')
+# if player_score > 21:
+    #     result_text.set('dealer won')
     # global player_score
     # global player_ace
     #
@@ -75,33 +88,59 @@ def deal_player():
 
 
 def deal_dealer():
+
     dealer_score = score_hand(dealer_hand)
-
-    while 0 < dealer_score < 17:
-        dealer_hand.append(deal_cards(dealer_card_frame))
-        dealer_score = score_hand(dealer_hand)
-        dealer_score_label.set(dealer_score)
-
+    # player score shouldnt exceed 21
+    # deal until score is more than player but less than 21
+    # deal until just more than player score
     player_score = score_hand(player_hand)
 
-    if player_score > 21:
+    if player_score <= 21:
+
+        while dealer_score < player_score:
+            dealer_hand.append(_deal_cards(dealer_card_frame))
+            dealer_score = score_hand(dealer_hand)
+            dealer_score_label.set(dealer_score)
+
+        check_result(player_score, dealer_score)
+
+    else:
+        result_text.set('bad request')
+
+
+def check_result(ps, ds):
+
+    if ps > 21:
         result_text.set("dealer won")
 
-    elif dealer_score > 21 or dealer_score < player_score:
+    elif ps == 21:
+        result_text.set("playerio wins")
+
+    elif ds > 21 or ds < ps:
         result_text.set("player wins")
 
-    elif dealer_score > player_score:
-       result_text.set("dealere wins")
+    elif ds > ps:
+        result_text.set("dealere wins")
 
     else:
         result_text.set('draws')
 
+
+def initial_deal():
+
+    deal_player()
+    dealer_hand.append(_deal_cards(dealer_card_frame))
+    dealer_score_label.set(score_hand(dealer_hand))
+    deal_player()
+
+
 def newgame():
+
     global dealer_card_frame
     global player_card_frame
     global dealer_hand
     global player_hand
-    #destroy all frames
+    # destroy all frames
     dealer_card_frame.destroy()
     dealer_card_frame = tkinter.Frame(card_frame, background='green')
     dealer_card_frame.grid(row=0, column=1, sticky='ew', rowspan=2)
@@ -112,19 +151,21 @@ def newgame():
 
     dealer_hand = []
     player_hand = []
-
-    deal_player()
-    dealer_hand.append(deal_cards(dealer_card_frame))
-    dealer_score_label.set(score_hand(dealer_hand))
-    deal_player()
+    result_text.set('Game on')
+    initial_deal()
 
 
 def shuffle():
     random.shuffle(deck)
 
 
-mainwindow = tkinter.Tk()
+def play():
+    initial_deal()
+    mainwindow.mainloop()
 
+__name__ = '__main__'
+mainwindow = tkinter.Tk()
+# print(__name__)
 mainwindow.title(" black jack game")
 mainwindow.geometry("640x480")
 mainwindow.configure(background='green')
@@ -165,46 +206,43 @@ dealer_button.grid(row=0, column=0)
 player_button = tkinter.Button(button_frame, text='Player', command=deal_player)
 player_button.grid(row=0, column=1)
 
-newgame_button = tkinter.Button(button_frame,text = 'restart game', command = newgame)
-newgame_button.grid(row=0,column=3)
+newgame_button = tkinter.Button(button_frame, text='restart game', command=newgame)
+newgame_button.grid(row=0, column=3)
 
-shufflebutton = tkinter.Button(button_frame, text = 'shuffle', command = shuffle)
-shufflebutton.grid(row=0,column = 4)
+shufflebutton = tkinter.Button(button_frame, text='shuffle', command=shuffle)
+shufflebutton.grid(row=0, column=4)
 # Loading Card Images
 cards = []
 load_images(cards)
-print(cards)
-
-
+# print(cards)
 rbValue = tkinter.IntVar()
-#set default value
+# set default value
 rbValue.set(1)
-#buttons begin here
-radioframe = tkinter.LabelFrame(mainwindow, text = 'select no of decks')
-radioframe.grid(row=4,column =0)
+# buttons begin here
+radioframe = tkinter.LabelFrame(mainwindow, text='select no of decks')
+radioframe.grid(row=4, column=0)
 
-radio1 = tkinter.Radiobutton(radioframe, text = '1', value = 1, variable = rbValue)
-radio2 = tkinter.Radiobutton(radioframe, text = '2', value = 2, variable = rbValue)
-radio3 = tkinter.Radiobutton(radioframe, text = '3', value = 3, variable = rbValue)
+radio1 = tkinter.Radiobutton(radioframe, text='1', value=1, variable=rbValue)
+radio2 = tkinter.Radiobutton(radioframe, text='2', value=2, variable=rbValue)
+radio3 = tkinter.Radiobutton(radioframe, text='3', value=3, variable=rbValue)
 
-radio1.grid(row=0,column=0,sticky='ew')
-radio2.grid(row=0,column=1,sticky='ew')
-radio3.grid(row=0,column=2,sticky='ew')
-deck=[]
-for i in range(0,rbValue.get()):
+radio1.grid(row=0, column=0, sticky='ew')
+radio2.grid(row=0, column=1, sticky='ew')
+radio3.grid(row=0, column=2, sticky='ew')
+deck = []
 
+for i in range(0, rbValue.get()):
     deck = deck + list(cards)
 
 random.shuffle(deck)
 
 dealer_hand = []
 player_hand = []
-
-newgame()
+# play()
+if __name__ == '__main__':
+    play()
 # deal_player()
 # #deal_dealer()
 # dealer_hand.append(deal_cards(dealer_card_frame))
 # dealer_score_label.set(score_hand(dealer_hand))
 # deal_player()
-
-mainwindow.mainloop()
