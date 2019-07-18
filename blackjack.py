@@ -50,41 +50,42 @@ def score_hand(hand):
 
 
 def deal_player():
-
-    player_score = score_hand(player_hand)
-
-    if player_score < 21:
-        player_hand.append(_deal_cards(player_card_frame))
+    if game_status =='on':
         player_score = score_hand(player_hand)
 
-    if player_score == 21:
-        result_text.set('Player player wins')
 
-    elif player_score > 21:
-        result_text.set('Delaer Delaer wins')
+        if player_score < 21:
+            player_hand.append(_deal_cards(player_card_frame))
+            player_score = score_hand(player_hand)
 
-    player_score_label.set(player_score)
-# if player_score > 21:
-    #     result_text.set('dealer won')
-    # global player_score
-    # global player_ace
-    #
-    # card_value = deal_cards(player_card_frame)[0]
-    #
-    # if card_value == 1 and not player_ace:
-    #     player_ace = True
-    #     card_value = 11
-    #
-    # player_score = player_score + card_value
-    #
-    # if player_score > 21 and player_ace:
-    #     player_score -= 10
-    #     player_ace = False
-    #
+        if player_score == 21:
+            result_text.set('Player player wins')
+
+        elif player_score > 21:
+            result_text.set('Delaer Delaer wins')
+
+        player_score_label.set(player_score)
     # if player_score > 21:
-    #     result_text.set("Dealer Wins")
-    #
-    # player_score_label.set(player_score)
+        #     result_text.set('dealer won')
+        # global player_score
+        # global player_ace
+        #
+        # card_value = deal_cards(player_card_frame)[0]
+        #
+        # if card_value == 1 and not player_ace:
+        #     player_ace = True
+        #     card_value = 11
+        #
+        # player_score = player_score + card_value
+        #
+        # if player_score > 21 and player_ace:
+        #     player_score -= 10
+        #     player_ace = False
+        #
+        # if player_score > 21:
+        #     result_text.set("Dealer Wins")
+        #
+        # player_score_label.set(player_score)
 
 
 def deal_dealer():
@@ -106,25 +107,30 @@ def deal_dealer():
 
     else:
         result_text.set('bad request')
+        game_status ='off'
 
 
 def check_result(ps, ds):
-
+    global game_status
     if ps > 21:
         result_text.set("dealer won")
+        game_status='off'
+
 
     elif ps == 21:
         result_text.set("playerio wins")
+        game_status='off'
 
     elif ds > 21 or ds < ps:
         result_text.set("player wins")
+        game_status='off'
 
     elif ds > ps:
         result_text.set("dealere wins")
-
+        game_status ='off'
     else:
         result_text.set('draws')
-
+        game_status='off'
 
 def initial_deal():
 
@@ -132,6 +138,8 @@ def initial_deal():
     dealer_hand.append(_deal_cards(dealer_card_frame))
     dealer_score_label.set(score_hand(dealer_hand))
     deal_player()
+    global game_status
+    game_status='on'
 
 
 def newgame():
@@ -140,6 +148,7 @@ def newgame():
     global player_card_frame
     global dealer_hand
     global player_hand
+    global game_status
     # destroy all frames
     dealer_card_frame.destroy()
     dealer_card_frame = tkinter.Frame(card_frame, background='green')
@@ -151,6 +160,7 @@ def newgame():
 
     dealer_hand = []
     player_hand = []
+    game_status ='on'
     result_text.set('Game on')
     initial_deal()
 
@@ -169,17 +179,21 @@ mainwindow = tkinter.Tk()
 mainwindow.title(" black jack game")
 mainwindow.geometry("640x480")
 mainwindow.configure(background='green')
+#frame for result
 result_text = tkinter.StringVar()
 result_text_label = tkinter.Label(mainwindow, background='red', textvariable=result_text)
 result_text_label.grid(row=0, column=0, columnspan=3)
 
+#main card frame box
 card_frame = tkinter.Frame(mainwindow, relief='sunken', borderwidth=1, background='green')
 card_frame.grid(row=1, column=0, sticky='ew, ', rowspan=2, columnspan=3)
 
+# initialize dealers score
 dealer_score_label = tkinter.IntVar()
 dealer_score = 0
 dealer_ace = False
 
+# label dealer
 tkinter.Label(card_frame, text="Dealer", background='blue', fg='white').grid(row=0, column=0)
 tkinter.Label(card_frame, textvariable=dealer_score_label, background='green', fg='white').grid(row=1, column=0)
 
@@ -187,10 +201,12 @@ tkinter.Label(card_frame, textvariable=dealer_score_label, background='green', f
 dealer_card_frame = tkinter.Frame(card_frame, background='green')
 dealer_card_frame.grid(row=0, column=1, sticky='ew', rowspan=2)
 
+# initialize player variables
 player_score_label = tkinter.IntVar()
 player_score = 0
 player_ace = False
 
+# labelling player
 tkinter.Label(card_frame, text="Player", background='green', fg='white').grid(row=2, column=0)
 tkinter.Label(card_frame, textvariable=player_score_label, background='green', fg='white').grid(row=3, column=0)
 
@@ -201,9 +217,9 @@ player_card_frame.grid(row=2, column=1, sticky='ew', rowspan=2)
 button_frame = tkinter.Frame(mainwindow)
 button_frame.grid(row=3, column=0, columnspan=3, sticky='w')
 
-dealer_button = tkinter.Button(button_frame, text='Dealer', command=deal_dealer)
+dealer_button = tkinter.Button(button_frame, text='Hit dealer', command=deal_dealer)
 dealer_button.grid(row=0, column=0)
-player_button = tkinter.Button(button_frame, text='Player', command=deal_player)
+player_button = tkinter.Button(button_frame, text='Hit player', command=deal_player)
 player_button.grid(row=0, column=1)
 
 newgame_button = tkinter.Button(button_frame, text='restart game', command=newgame)
@@ -238,6 +254,7 @@ random.shuffle(deck)
 
 dealer_hand = []
 player_hand = []
+game_status ='on'
 # play()
 if __name__ == '__main__':
     play()
